@@ -4,7 +4,7 @@ from math import floor
 from time import sleep
 
 amount_in_row = 3
-grid_dimension = 10
+grid_dimension = 5
 height = grid_dimension
 width = grid_dimension
 grid_size = 64
@@ -41,16 +41,21 @@ def draw_grid():
         pygame.draw.rect(screen, (0,0,0), (0, (i*grid_size)-floor(border_thickness/2), width*grid_size, border_thickness))
 
 def check_win(values):
-    a = 0
     for i in range(len(values)-1): #match found horizontally
-        if (values[i] == values[i+1]) and (values[i] != None) and (values[i+1] != None):
-            a += 1
-            if (a == amount_in_row-1):
-                return True
+        a = 0
+        for j in range(1,amount_in_row):
+            try:
+                if (values[i] == values[i+j]) and (values[i] != None) and (values[i+j] != None):
+                    a += 1
+                    if (a == amount_in_row-1):
+                        print("yayyyy")
+                        return True
+            except:
+                pass
     return False
 
 def game_check():
-    #check for three in a row
+    #check for the correct amount in a row
     c = 0
     for y in range(height):
         values = []
@@ -82,6 +87,19 @@ def game_check():
         return True #match found diagonally from right top to left bottom
     if c == 0:
         return True #Draw, no spaces left and no win
+    #below code does nothing yet
+    for x_start in range(width):
+        for x,y in zip(range(x_start,width),range(height-x_start)):
+            pass
+    for y_start in range(height):
+        for y,x in zip(range(y_start,height),range(width-y_start)):
+            pass
+    for x_start_backwards in range(width,-1,-1):
+        for x,y in zip(range(x_start_backwards-1,-1,-1),range(height-(width-x_start_backwards))):
+            pass
+    for y_start_backwards in range(height,-1,-1):
+        for x,y in zip(range(width-1,(width-y_start_backwards)-1,-1),range(width-(height-y_start_backwards))):
+            pass #doesn't yet work
     return False
 def draw_screen():
     screen.fill(empty)
@@ -106,10 +124,10 @@ while running:
             if event.type == MOUSEBUTTONUP:
                 if event.button == 1: #left click places move
                     mouse_x, mouse_y = pygame.mouse.get_pos()
-                    print(mouse_x,mouse_y)
+                    print("Mouse:",mouse_x,mouse_y)
                     grid_x = floor(mouse_x/grid_size)
                     grid_y = floor(mouse_y/grid_size)
-                    print(grid_x,grid_y,player)
+                    print("Mouse Grid and Player:",grid_x,grid_y,player)
                     state = make_move(grid_x,grid_y,player) #check move
                 elif event.button == 3: #right click resets the game
                     reset = True
