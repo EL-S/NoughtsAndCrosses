@@ -2,13 +2,22 @@ import pygame
 from pygame.locals import *
 from math import floor
 from time import sleep
+from random import randint
 
-amount_in_row = 3
-grid_dimension = 5
+pygame.init()
+display_info = pygame.display.Info()
+
+amount_in_row = randint(2,20)
+grid_dimension = randint(amount_in_row,randint(amount_in_row,amount_in_row*2))
 height = grid_dimension
 width = grid_dimension
-grid_size = 64
-border_thickness = grid_size/8
+if (display_info.current_w > display_info.current_h):
+    smallest_side = display_info.current_h
+else:
+    smallest_side = display_info.current_w
+grid_size = round(smallest_side/grid_dimension)
+border_thickness = round(grid_size/8)
+
 grid = [[None for x in range(width)] for y in range(height)]
 
 empty = (255,255,255)
@@ -18,12 +27,26 @@ running = True
 move = True
 player = 1
 
-screen = pygame.display.set_mode((width*grid_size,height*grid_size))
-pygame.init()
+screen = pygame.display.set_mode((smallest_side,smallest_side))
+
+def rules(amount_in_row,grid_dimension):
+    print("Win Condition:",amount_in_row,"in a row")
+    print("Play Area:",grid_dimension,"x",grid_dimension)
 
 def reset_game():
+    amount_in_row = randint(2,20)
+    grid_dimension = randint(amount_in_row,randint(amount_in_row,amount_in_row*2))
+    height = grid_dimension
+    width = grid_dimension
+    if (display_info.current_w > display_info.current_h):
+        smallest_side = display_info.current_h
+    else:
+        smallest_side = display_info.current_w
+    grid_size = round(smallest_side/grid_dimension)
+    border_thickness = round(grid_size/8)
     grid = [[None for x in range(width)] for y in range(height)]
-    return grid
+    rules(amount_in_row,grid_dimension)
+    return grid,amount_in_row,grid_dimension,height,width,smallest_side,grid_size,border_thickness
 
 def make_move(grid_x,grid_y,player):
     #check if valid
@@ -48,7 +71,6 @@ def check_win(values):
                 if (values[i] == values[i+j]) and (values[i] != None) and (values[i+j] != None):
                     a += 1
                     if (a == amount_in_row-1):
-                        print("yayyyy")
                         return True
             except:
                 pass
@@ -73,34 +95,38 @@ def game_check():
         current_state = check_win(values)
         if current_state:
             return True #match found vertically
-    values = []
-    for x,y in zip(range(width), range(height)):
-        values.append(grid[y][x])
-    current_state = check_win(values)
-    if current_state:
-        return True #match found diagonally from left top to right bottom
-    values = []
-    for x,y in zip(range(width-1,-1,-1),range(height)):
-        values.append(grid[y][x])
-    current_state = check_win(values)
-    if current_state:
-        return True #match found diagonally from right top to left bottom
+    for x_start in range(width):
+        values = []
+        for x,y in zip(range(x_start,width),range(height-x_start)):
+            values.append(grid[y][x])
+        current_state = check_win(values)
+        if current_state:
+            return True #match found diagonally
+    for y_start in range(height):
+        values = []
+        for x,y in zip(range(width-y_start),range(y_start,height)):
+            values.append(grid[y][x])
+        current_state = check_win(values)
+        if current_state:
+            return True #match found diagonally
+    for x_start_backwards in range(width,-1,-1):
+        values = []
+        for x,y in zip(range(x_start_backwards-1,-1,-1),range(height-(width-x_start_backwards))):
+            values.append(grid[y][x])
+        current_state = check_win(values)
+        if current_state:
+            return True #match found diagonally
+    for y_start_backwards in range(height,-1,-1):
+        values = []
+        for x,y in zip(range(width-1,(width-y_start_backwards)-1,-1),range(height-y_start_backwards,height)):
+            values.append(grid[y][x])
+        current_state = check_win(values)
+        if current_state:
+            return True #match found diagonally
     if c == 0:
         return True #Draw, no spaces left and no win
-    #below code does nothing yet
-    for x_start in range(width):
-        for x,y in zip(range(x_start,width),range(height-x_start)):
-            pass
-    for y_start in range(height):
-        for y,x in zip(range(y_start,height),range(width-y_start)):
-            pass
-    for x_start_backwards in range(width,-1,-1):
-        for x,y in zip(range(x_start_backwards-1,-1,-1),range(height-(width-x_start_backwards))):
-            pass
-    for y_start_backwards in range(height,-1,-1):
-        for x,y in zip(range(width-1,(width-y_start_backwards)-1,-1),range(width-(height-y_start_backwards))):
-            pass #doesn't yet work
-    return False
+    return False #game continues, no win
+
 def draw_screen():
     screen.fill(empty)
     for y in range(0,height):
@@ -114,6 +140,7 @@ def draw_screen():
     draw_grid() 
     pygame.display.flip()
 
+rules(amount_in_row,grid_dimension)
 reset = False
 while running:
     draw_screen() #update screen
@@ -124,10 +151,8 @@ while running:
             if event.type == MOUSEBUTTONUP:
                 if event.button == 1: #left click places move
                     mouse_x, mouse_y = pygame.mouse.get_pos()
-                    print("Mouse:",mouse_x,mouse_y)
                     grid_x = floor(mouse_x/grid_size)
                     grid_y = floor(mouse_y/grid_size)
-                    print("Mouse Grid and Player:",grid_x,grid_y,player)
                     state = make_move(grid_x,grid_y,player) #check move
                 elif event.button == 3: #right click resets the game
                     reset = True
@@ -147,6 +172,6 @@ while running:
         draw_screen() #update screen
         print("Game over! Resetting")
         sleep(1)
-        grid = reset_game()
+        grid,amount_in_row,grid_dimension,height,width,smallest_side,grid_size,border_thickness = reset_game()
         reset = False
 pygame.quit()
