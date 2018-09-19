@@ -71,10 +71,11 @@ def check_win(values):
                 if (values[i] == values[i+j]) and (values[i] != None) and (values[i+j] != None):
                     a += 1
                     if (a == amount_in_row-1):
-                        return True
+                        return True,values[i]
             except:
                 pass
-    return False
+    player_winner = False
+    return False,player_winner
 
 def game_check():
     #check for the correct amount in a row
@@ -85,47 +86,79 @@ def game_check():
             values.append(grid[y][x])
             if grid[y][x] == None:
                 c += 1
-        current_state = check_win(values)
+        current_state,player_winner = check_win(values)
+        if player_winner:
+            if player_winner == 1:
+                score_update = [1,0]
+            elif player_winner == 2:
+                score_update = [0,1]
         if current_state:
-            return True #match found horizontally
+            return True,score_update #match found horizontally
     for x in range(width):
         values = []
         for y in range(height):
             values.append(grid[y][x])
-        current_state = check_win(values)
+        current_state,player_winner = check_win(values)
+        if player_winner:
+            if player_winner == 1:
+                score_update = [1,0]
+            elif player_winner == 2:
+                score_update = [0,1]
         if current_state:
-            return True #match found vertically
+            return True,score_update #match found vertically
     for x_start in range(width):
         values = []
         for x,y in zip(range(x_start,width),range(height-x_start)):
             values.append(grid[y][x])
-        current_state = check_win(values)
+        current_state,player_winner = check_win(values)
+        if player_winner:
+            if player_winner == 1:
+                score_update = [1,0]
+            elif player_winner == 2:
+                score_update = [0,1]
         if current_state:
-            return True #match found diagonally
+            return True,score_update #match found diagonally
     for y_start in range(height):
         values = []
         for x,y in zip(range(width-y_start),range(y_start,height)):
             values.append(grid[y][x])
-        current_state = check_win(values)
+        current_state,player_winner = check_win(values)
+        if player_winner:
+            if player_winner == 1:
+                score_update = [1,0]
+            elif player_winner == 2:
+                score_update = [0,1]
         if current_state:
-            return True #match found diagonally
+            return True,score_update #match found diagonally
     for x_start_backwards in range(width,-1,-1):
         values = []
         for x,y in zip(range(x_start_backwards-1,-1,-1),range(height-(width-x_start_backwards))):
             values.append(grid[y][x])
-        current_state = check_win(values)
+        current_state,player_winner = check_win(values)
+        if player_winner:
+            if player_winner == 1:
+                score_update = [1,0]
+            elif player_winner == 2:
+                score_update = [0,1]
         if current_state:
-            return True #match found diagonally
+            return True,score_update #match found diagonally
     for y_start_backwards in range(height,-1,-1):
         values = []
         for x,y in zip(range(width-1,(width-y_start_backwards)-1,-1),range(height-y_start_backwards,height)):
             values.append(grid[y][x])
-        current_state = check_win(values)
+        current_state,player_winner = check_win(values)
+        if player_winner:
+            if player_winner == 1:
+                score_update = [1,0]
+            elif player_winner == 2:
+                score_update = [0,1]
         if current_state:
-            return True #match found diagonally
+            return True,score_update #match found diagonally
     if c == 0:
-        return True #Draw, no spaces left and no win
-    return False #game continues, no win
+        score_update = True
+        return True,score_update #Draw, no spaces left and no win
+    score_update = False
+    return False,score_update #game continues, no win
 
 def draw_screen():
     screen.fill(empty)
@@ -142,6 +175,7 @@ def draw_screen():
 
 rules(amount_in_row,grid_dimension)
 reset = False
+score = [0,0]
 while running:
     draw_screen() #update screen
     #check if game is over
@@ -167,7 +201,17 @@ while running:
         player = 1
     move = True
     if reset != True:
-        reset = game_check() #check if game is over
+        reset,score_update = game_check() #check if game is over
+    if score_update != False:
+        if score_update == True:
+            print("Draw!")
+        elif score_update[0] == 1:
+            score[0] += 1
+            print("Red wins!")
+        elif score_update[1] == 1:
+            score[1] += 1
+            print("Blue wins!")
+        print("Red:",score[0],"Blue:",score[1])
     if reset == True:
         draw_screen() #update screen
         print("Game over! Resetting")
