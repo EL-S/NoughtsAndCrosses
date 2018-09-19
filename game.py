@@ -176,6 +176,8 @@ def draw_screen():
 rules(amount_in_row,grid_dimension)
 reset = False
 score = [0,0]
+score_update = False
+
 while running:
     draw_screen() #update screen
     #check if game is over
