@@ -7,35 +7,9 @@ from random import randint
 pygame.init()
 display_info = pygame.display.Info()
 
-amount_in_row = randint(2,20)
-grid_dimension = randint(amount_in_row,randint(amount_in_row,amount_in_row*2))
-height = grid_dimension
-width = grid_dimension
-if (display_info.current_w > display_info.current_h):
-    smallest_side = display_info.current_h
-else:
-    smallest_side = display_info.current_w
-grid_size = round(smallest_side/grid_dimension)
-border_thickness = round(grid_size/8)
-
-grid = [[None for x in range(width)] for y in range(height)]
-
-empty = (255,255,255)
-player_1 = (255,0,0)
-player_2 = (0,0,255)
-running = True
-move = True
-player = 1
-
-screen = pygame.display.set_mode((smallest_side,smallest_side))
-
-def rules(amount_in_row,grid_dimension):
-    print("Win Condition:",amount_in_row,"in a row")
-    print("Play Area:",grid_dimension,"x",grid_dimension)
-
-def reset_game():
-    amount_in_row = randint(2,20)
-    grid_dimension = randint(amount_in_row,randint(amount_in_row,amount_in_row*2))
+def game_rules():
+    amount_in_row = randint(3,5)
+    grid_dimension = randint(amount_in_row,randint(amount_in_row,round(4*(amount_in_row**(1/2)))))
     height = grid_dimension
     width = grid_dimension
     if (display_info.current_w > display_info.current_h):
@@ -46,7 +20,16 @@ def reset_game():
     border_thickness = round(grid_size/8)
     grid = [[None for x in range(width)] for y in range(height)]
     rules(amount_in_row,grid_dimension)
-    return grid,amount_in_row,grid_dimension,height,width,smallest_side,grid_size,border_thickness
+    screen = pygame.display.set_mode((smallest_side,smallest_side))
+    return grid,amount_in_row,grid_dimension,height,width,smallest_side,grid_size,border_thickness,screen
+    
+def rules(amount_in_row,grid_dimension):
+    print("Win Condition:",amount_in_row,"in a row")
+    print("Play Area:",grid_dimension,"x",grid_dimension)
+
+def reset_game():
+    grid,amount_in_row,grid_dimension,height,width,smallest_side,grid_size,border_thickness,screen = game_rules()
+    return grid,amount_in_row,grid_dimension,height,width,smallest_side,grid_size,border_thickness,screen
 
 def make_move(grid_x,grid_y,player):
     #check if valid
@@ -173,10 +156,17 @@ def draw_screen():
     draw_grid() 
     pygame.display.flip()
 
+grid,amount_in_row,grid_dimension,height,width,smallest_side,grid_size,border_thickness,screen = game_rules()
 rules(amount_in_row,grid_dimension)
 reset = False
 score = [0,0]
 score_update = False
+empty = (255,255,255)
+player_1 = (255,0,0)
+player_2 = (0,0,255)
+running = True
+move = True
+player = 1
 
 while running:
     draw_screen() #update screen
@@ -217,7 +207,7 @@ while running:
     if reset == True:
         draw_screen() #update screen
         print("Game over! Resetting")
-        sleep(1)
-        grid,amount_in_row,grid_dimension,height,width,smallest_side,grid_size,border_thickness = reset_game()
+        sleep(0.2)
+        grid,amount_in_row,grid_dimension,height,width,smallest_side,grid_size,border_thickness,screen = reset_game()
         reset = False
 pygame.quit()
